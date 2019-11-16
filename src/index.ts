@@ -2,6 +2,11 @@ import { EventEmitter } from 'events';
 import { Patch, produceWithPatches } from 'immer';
 import * as React from 'react';
 
+/**
+ * Create store object for state management
+ * @param initialState
+ * @returns {Object} { subscribe, updateState, useStateValue }
+ */
 export const createStore = <State>(initialState: State) => {
   // Make a local copy of the initial state
   let [state] = produceWithPatches(initialState, d => {
