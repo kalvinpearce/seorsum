@@ -45,6 +45,9 @@
     "tslint-config-prettier": "^1.18.0",
     "typescript": "^3.7.2"
   },
+  "dependencies": {
+    "immer": "^5.0.0"
+  },
   "peerDependencies": {
     "@types/react": "^16.9.11",
     "react": "*",
@@ -69,8 +72,5 @@
     "collectCoverageFrom": [
       "src/**/*"
     ]
-  },
-  "dependencies": {
-    "immer": "^5.0.0"
   }
 }
