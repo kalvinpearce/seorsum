@@ -19,6 +19,21 @@ describe('updateState', () => {
     expect(newState.a).toBe(newA);
   });
 
+  it('updates state from async functions', async () => {
+    const newA = 'world';
+
+    const { updateState } = createStore(initialState);
+    const asyncAction = async () => {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      return updateState(draft => {
+        draft.a = newA;
+      });
+    };
+
+    const newState = await asyncAction();
+    expect(newState.a).toBe(newA);
+  });
+
   it('updates deep state', () => {
     const newFirstName = 'james';
 
