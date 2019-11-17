@@ -46,7 +46,7 @@ export const createStore = <State>(initialState: State) => {
     callback: (state: T) => void,
   ) => {
     // Little messy way of grabbing the state path from the params
-    const res = stateValue.toString().match(/\.(.*);/);
+    const res = stateValue.toString().match(/\.([a-z\.]*)/);
     // This should always pass but is needed for intellisense
     if (res && res.length > 1) {
       const key = res[1];
