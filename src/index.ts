@@ -1,6 +1,8 @@
-import { EventEmitter } from 'events';
 import { Patch, produceWithPatches } from 'immer';
 import * as React from 'react';
+
+type FunctionBank = { [name: string]: (() => void) | undefined };
+type Subscriptions = { [name: string]: FunctionBank };
 
 /**
  * Create store object for state management
@@ -13,7 +15,8 @@ export const createStore = <State>(initialState: State) => {
     /* unchanged state */
   });
   // Create event bus
-  const bus = new EventEmitter();
+  // const bus = new EventEmitter();
+  const subscriptions: Subscriptions = {};
 
   /**
    * Create update state function
@@ -27,7 +30,7 @@ export const createStore = <State>(initialState: State) => {
     [state, changes] = produceWithPatches(state, draftFn);
     // Emit callback for every change
     changes.forEach(c => {
-      emitDeep(bus, c.path);
+      emitDeep(subscriptions, c.path);
     });
 
     // Return updated state
@@ -45,23 +48,18 @@ export const createStore = <State>(initialState: State) => {
     stateValue: (state: State) => T,
     callback: (state: T) => void,
   ) => {
-    // Little messy way of grabbing the state path from the params
-    const res = stateValue.toString().match(/\.([a-z\.]*)/);
-    // This should always pass but is needed for intellisense
-    if (res && res.length > 1) {
-      const key = res[1];
-      const fn = () => callback(stateValue(state));
-      // Add to event bus
-      bus.addListener(key, fn);
-      // Return function to remove from event bus
-      return () => {
-        bus.removeListener(key, fn);
-      };
+    const key = stateValue.toString();
+    const fn = () => callback(stateValue(state));
+    // Add to event bus
+    if (subscriptions[key] === undefined) {
+      subscriptions[key] = {};
     }
-
-    // If it somehow breaks, calling unsubscribe will throw error
+    const keys = Object.keys(subscriptions[key]);
+    const index = keys.length;
+    subscriptions[key][index] = fn;
+    // Return function to remove from event bus
     return () => {
-      throw new Error('Unsubscribe is not working correctly.');
+      subscriptions[key][index] = undefined;
     };
   };
 
@@ -89,13 +87,17 @@ export const createStore = <State>(initialState: State) => {
 
 // Emits to event bus for each path parent and child
 const emitDeep = (
-  bus: EventEmitter,
+  subscriptions: Subscriptions,
   paths: Array<string | number>,
   parent: string = '',
 ) => {
-  const key = parent + paths[0];
-  bus.emit(key);
+  const path = parent + paths[0];
+  const keys = Object.keys(subscriptions).filter(k => k.includes(path));
+  keys.forEach(key => {
+    const subKeys = Object.keys(subscriptions[key]);
+    subKeys.forEach(subKey => subscriptions[key][subKey]?.());
+  });
   if (paths.length > 1) {
-    emitDeep(bus, paths.slice(1, paths.length), key + '.');
+    emitDeep(subscriptions, paths.slice(1, paths.length), path + '.');
   }
 };
