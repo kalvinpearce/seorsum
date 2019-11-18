@@ -1,9 +1,10 @@
+import { EventEmitter } from 'events';
 import { Patch, produceWithPatches } from 'immer';
 import * as React from 'react';
+import { PathValue, Path, getFromPath } from './path';
 
 type FunctionBank = { [name: string]: (() => void) | undefined };
 type Subscriptions = { [name: string]: FunctionBank };
-
 /**
  * Create store object for state management
  * @param initialState
@@ -15,7 +16,6 @@ export const createStore = <State>(initialState: State) => {
     /* unchanged state */
   });
   // Create event bus
-  // const bus = new EventEmitter();
   const subscriptions: Subscriptions = {};
 
   /**
@@ -40,16 +40,21 @@ export const createStore = <State>(initialState: State) => {
   /**
    * Subscribes to a piece of state
    * Runs callback every time the state piece is changed
-   * @param stateValue piece of state to subscribe to
+   * @param stateValue piece of state to subscribe to using string key
+   * or array of keys for deeper property access
    * @param callback function to run when state piece changes
    * @returns function to unsubscribe the callback
    */
-  const subscribe = <T>(
-    stateValue: (state: State) => T,
-    callback: (state: T) => void,
+  const subscribe = <PPath extends Path<State, PPath>>(
+    statePath: PPath,
+    callback: (state: PathValue<State, PPath> | State[keyof State]) => void,
   ) => {
-    const key = stateValue.toString();
-    const fn = () => callback(stateValue(state));
+    const fn = () => callback(getFromPath(state, statePath));
+
+    const key = Array.isArray(statePath)
+      ? statePath.join('.')
+      : (statePath as string);
+
     // Add to event bus
     if (subscriptions[key] === undefined) {
       subscriptions[key] = {};
@@ -67,13 +72,15 @@ export const createStore = <State>(initialState: State) => {
    * Subscribes to a piece of state
    * Rerenders every time the state changes
    * Unsubscribes when unmounts
-   * @param func piece of state to subscribe to
+   * @param statePath piece of state to subscribe to
    * @returns state piece current value
    */
-  const useStateValue = <T>(func: (state: State) => T) => {
-    const [value, setValue] = React.useState(func(state));
+  const useStateValue = <PPath extends Path<State, PPath>>(
+    statePath: PPath,
+  ) => {
+    const [value, setValue] = React.useState(getFromPath(state, statePath));
     React.useEffect(() => {
-      return subscribe(func, setValue);
+      return subscribe(statePath, setValue);
     }, []);
     return value;
   };
