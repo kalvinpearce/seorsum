@@ -1,7 +1,6 @@
-import { EventEmitter } from 'events';
 import { Patch, produceWithPatches } from 'immer';
 import * as React from 'react';
-import { PathValue, Path, getFromPath } from './path';
+import { getFromPath, Path, PathValue } from './path';
 
 type FunctionBank = { [name: string]: (() => void) | undefined };
 type Subscriptions = { [name: string]: FunctionBank };

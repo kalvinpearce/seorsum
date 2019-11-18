@@ -125,10 +125,13 @@ export const getFromPath = <T extends any, P extends Path<T, P>, D>(
   path: P,
   value?: D,
 ) => {
-  // If path is not defined or it has false value
-  if (!path) return undefined;
-  // Find value if exist return otherwise return undefined value;
+  // return undefined if path is falsy
+  if (!path) {
+    return undefined;
+  }
+
   return Array.isArray(path)
+    // Find value if exist return otherwise return undefined value;
     ? (path.reduce(
         (prevObj, key) => prevObj && prevObj[key],
         object,
