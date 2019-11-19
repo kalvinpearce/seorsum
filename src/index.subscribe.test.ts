@@ -13,7 +13,7 @@ describe('subscribe', () => {
     const { updateState, subscribe } = createStore(initialState);
 
     const mockSub = jest.fn();
-    subscribe(s => s.a, mockSub);
+    subscribe('a', mockSub);
 
     updateState(d => {
       d.a = 'changed';
@@ -22,13 +22,45 @@ describe('subscribe', () => {
     expect(mockSub).toBeCalledTimes(1);
   });
 
+  it('calls subscribed deep property event when relevant state is changed', () => {
+    const newA = 'Broseph';
+    const mockSub = jest.fn();
+
+    const { updateState, subscribe } = createStore(initialState);
+
+    subscribe(['name', 'first'], mockSub);
+    const newState = updateState(d => {
+      d.name.first = newA;
+    });
+    expect(newState.name.first).toBe(newA);
+    // once for 'name', once for 'first'
+    expect(mockSub).toBeCalledTimes(2);
+  });
+
+  it('calls subscribed event when relevant state is changed with different param versions', () => {
+    const newA = 'world';
+    const mockSub = jest.fn();
+
+    const { updateState, subscribe } = createStore(initialState);
+
+    subscribe('a', mockSub);
+    subscribe(['a'], mockSub);
+
+    const newState = updateState(d => {
+      d.a = newA;
+    });
+
+    expect(newState.a).toBe(newA);
+    expect(mockSub).toBeCalledTimes(2);
+  });
+
   it("doesn't call event when irrelevant state is changed", () => {
     const { updateState, subscribe } = createStore(initialState);
 
     const mockSub1 = jest.fn();
     const mockSub2 = jest.fn();
-    subscribe(s => s.name.first, mockSub1);
-    subscribe(s => s.name.last, mockSub2);
+    subscribe(['name', 'first'], mockSub1);
+    subscribe(['name', 'last'], mockSub2);
 
     updateState(d => {
       d.name.first = 'changed';
@@ -42,7 +74,7 @@ describe('subscribe', () => {
     const { updateState, subscribe } = createStore(initialState);
 
     const mockSub = jest.fn();
-    subscribe(s => s.a, mockSub);
+    subscribe('a', mockSub);
 
     const newState = updateState(d => {
       d.a = 'changed';
@@ -56,8 +88,8 @@ describe('subscribe', () => {
 
     const mockSub1 = jest.fn();
     const mockSub2 = jest.fn();
-    subscribe(s => s.a, mockSub1);
-    subscribe(s => s.a, mockSub2);
+    subscribe('a', mockSub1);
+    subscribe('a', mockSub2);
     updateState(d => {
       d.a = 'changed';
     });
@@ -69,7 +101,7 @@ describe('subscribe', () => {
     const { updateState, subscribe } = createStore(initialState);
 
     const mockSub = jest.fn();
-    subscribe(s => s.name.first, mockSub);
+    subscribe(['name', 'first'], mockSub);
 
     updateState(d => {
       d.name = {
@@ -85,7 +117,7 @@ describe('subscribe', () => {
     const { updateState, subscribe } = createStore(initialState);
 
     const mockSub = jest.fn();
-    subscribe(s => s.name, mockSub);
+    subscribe('name', mockSub);
     updateState(d => {
       d.name.first = 'changed';
     });
@@ -96,7 +128,7 @@ describe('subscribe', () => {
     const { updateState, subscribe } = createStore(initialState);
 
     const mockSub = jest.fn();
-    const unsub = subscribe(s => s.a, mockSub);
+    const unsub = subscribe('a', mockSub);
 
     updateState(d => {
       d.a = 'changed';
@@ -117,8 +149,8 @@ describe('subscribe', () => {
 
     const mockSub1 = jest.fn();
     const mockSub2 = jest.fn();
-    const unsub1 = subscribe(s => s.a, mockSub1);
-    const unsub2 = subscribe(s => s.a, mockSub2);
+    const unsub1 = subscribe('a', mockSub1);
+    const unsub2 = subscribe('a', mockSub2);
 
     updateState(d => {
       d.a = 'changed';
@@ -135,5 +167,53 @@ describe('subscribe', () => {
 
     expect(mockSub1).toBeCalledTimes(1);
     expect(mockSub2).toBeCalledTimes(2);
+  });
+
+  it("it doesn't unsubscribe the wrong event with different param types 1", () => {
+    const mockSub1 = jest.fn();
+    const mockSub2 = jest.fn();
+
+    const { updateState, subscribe } = createStore(initialState);
+
+    const unsub1 = subscribe('a', mockSub1);
+    const unsub2 = subscribe(['a'], mockSub2);
+
+    updateState(d => {
+      d.a = 'changed';
+    });
+    expect(mockSub1).toBeCalledTimes(1);
+    expect(mockSub2).toBeCalledTimes(1);
+
+    unsub1();
+
+    updateState(d => {
+      d.a = 'changed again';
+    });
+    expect(mockSub1).toBeCalledTimes(1);
+    expect(mockSub2).toBeCalledTimes(2);
+  });
+
+  it("it doesn't unsubscribe the wrong event with different param types 2", () => {
+    const mockSub1 = jest.fn();
+    const mockSub2 = jest.fn();
+
+    const { updateState, subscribe } = createStore(initialState);
+
+    const unsub1 = subscribe('a', mockSub1);
+    const unsub2 = subscribe(['a'], mockSub2);
+
+    updateState(d => {
+      d.a = 'changed';
+    });
+    expect(mockSub1).toBeCalledTimes(1);
+    expect(mockSub2).toBeCalledTimes(1);
+
+    unsub2();
+
+    updateState(d => {
+      d.a = 'changed again';
+    });
+    expect(mockSub1).toBeCalledTimes(2);
+    expect(mockSub2).toBeCalledTimes(1);
   });
 });
