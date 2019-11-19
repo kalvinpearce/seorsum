@@ -40,8 +40,13 @@ const setAge = (age: number) => {
 /* React Usage */
 import * as React from 'react';
 const AgeComponent = () => {
-  const age = useStateValue(state => state.age);
-  return <span>{age}</span>;
+  const age = useStateValue('age');
+  const firstName = useStateValue(['name', 'first']);
+  return (
+    <span>
+      {firstName} is {age} years old.
+    </span>
+  );
 };
 // This component is now subscribed to the state and when the age is changed
 // the component will rerender
@@ -56,12 +61,9 @@ const AgeButtonComponent = () => (
 
 /* Non-react usage */
 // Just subscribe to a state with a callback to run
-const unsubscribe = subscribe(
-  state => state.age,
-  age => {
-    console.log(`Age changed! New value is ${age}`);
-  },
-);
+const unsubscribe = subscribe('age', age => {
+  console.log(`Age changed! New value is ${age}`);
+});
 // This callback will be run every time age is changed until `unsubscribe` is run
 setAge(60); // console.log: "Age changed! New value is 60"
 unsubscribe();
