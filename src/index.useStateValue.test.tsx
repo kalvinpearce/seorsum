@@ -25,54 +25,57 @@ const Comp: React.FC<{
 
 describe('useStateValue', () => {
   it('renderes the initial state', () => {
-    // Create store
+    /* Setup */
     const { useStateValue } = createStore(initialState);
     const wrapper = mount(<Comp useState={() => useStateValue('a')} />);
-    // Expect component to render the initial state provided
+
+    /* Test */
     expect(wrapper.find('span').text()).toBe(initialState.a);
   });
 
   it("doesn't try to rerender after unmounting", () => {
+    /* Setup */
     const spy = jest.spyOn(global.console, 'error');
-
-    // Create store
     const { updateState, useStateValue } = createStore(initialState);
     const wrapper = mount(<Comp useState={() => useStateValue('a')} />);
-    // Expect component to render the initial state provided
+
+    /* Test */
     expect(wrapper.find('span').text()).toBe(initialState.a);
 
+    /* Action */
     wrapper.unmount();
-
-    // Perform state change in act to suppress console error
     act(() => {
       updateState(d => {
         d.a = 'changed';
       });
     });
 
+    /* Test */
     expect(spy).not.toHaveBeenCalled();
   });
 
   it('updates shallow state', () => {
+    /* Setup */
     const newA = 'world';
-    // Create store
     const { updateState, useStateValue } = createStore(initialState);
     const wrapper = mount(<Comp useState={() => useStateValue('a')} />);
-    // Expect component to render the initial state provided
+
+    /* Test */
     expect(wrapper.find('span').text()).toBe(initialState.a);
 
-    // Perform state change in act to suppress console error
+    /* Action */
     act(() => {
       updateState(d => {
         d.a = newA;
       });
     });
-    // Expect component to render the new state
+
+    /* Test */
     expect(wrapper.find('span').text()).toBe(newA);
   });
 
   it('rerenders component that uses multiple state', () => {
-    // Create store
+    /* Setup */
     const { updateState, useStateValue } = createStore(initialState);
     const mockfn = jest.fn();
     const CompMulti = () => {
@@ -88,28 +91,37 @@ describe('useStateValue', () => {
       );
     };
     mount(<CompMulti />);
+
+    /* Test */
     expect(mockfn).toBeCalledTimes(1);
 
-    // Perform state change in act to suppress console error
+    /* Action */
     act(() => {
       updateState(d => {
         d.a = 'changes';
       });
     });
+
+    /* Test */
     expect(mockfn).toBeCalledTimes(2);
-    // Perform state change in act to suppress console error
+
+    /* Action */
     act(() => {
       updateState(d => {
         d.name.first = 'changes';
       });
     });
+
+    /* Test */
     expect(mockfn).toBeCalledTimes(3);
   });
 
   it('rerenders only the component that uses the updated state', () => {
-    // Create store
+    /* Setup */
     const { updateState, useStateValue } = createStore(initialState);
     const mockOne = jest.fn();
+    const mockTwo = jest.fn();
+    const mockThree = jest.fn();
     const CompOne = () => (
       <Comp
         useState={() => useStateValue('a')}
@@ -120,7 +132,6 @@ describe('useStateValue', () => {
         }
       />
     );
-    const mockTwo = jest.fn();
     const CompTwo = () => (
       <Comp
         useState={() => useStateValue(['name', 'first'])}
@@ -131,7 +142,6 @@ describe('useStateValue', () => {
         }
       />
     );
-    const mockThree = jest.fn();
     const CompThree = () => (
       <Comp
         useState={() => useStateValue(['name', 'last'])}
@@ -142,7 +152,6 @@ describe('useStateValue', () => {
         }
       />
     );
-
     mount(
       <div>
         <CompOne />
@@ -151,26 +160,30 @@ describe('useStateValue', () => {
       </div>,
     );
 
+    /* Test */
     expect(mockOne).toBeCalledTimes(1);
     expect(mockTwo).toBeCalledTimes(1);
     expect(mockThree).toBeCalledTimes(1);
 
-    // Perform state change in act to suppress console error
+    /* Action */
     act(() => {
       updateState(d => {
         d.a = 'changed';
       });
     });
 
+    /* Test */
     expect(mockOne).toBeCalledTimes(2);
     expect(mockTwo).toBeCalledTimes(1);
     expect(mockThree).toBeCalledTimes(1);
   });
 
   it('rerenders components that use parent state of changed child state', () => {
-    // Create store
+    /* Setup */
     const { updateState, useStateValue } = createStore(initialState);
     const mockOne = jest.fn();
+    const mockTwo = jest.fn();
+    const mockThree = jest.fn();
     const CompOne = () => (
       <Comp
         useState={() => useStateValue('a')}
@@ -181,7 +194,6 @@ describe('useStateValue', () => {
         }
       />
     );
-    const mockTwo = jest.fn();
     const CompTwo = () => (
       <Comp
         useState={() => useStateValue('name')}
@@ -192,7 +204,6 @@ describe('useStateValue', () => {
         }
       />
     );
-    const mockThree = jest.fn();
     const CompThree = () => (
       <Comp
         useState={() => useStateValue(['name', 'first'])}
@@ -203,7 +214,6 @@ describe('useStateValue', () => {
         }
       />
     );
-
     mount(
       <div>
         <CompOne />
@@ -212,17 +222,19 @@ describe('useStateValue', () => {
       </div>,
     );
 
+    /* Test */
     expect(mockOne).toBeCalledTimes(1);
     expect(mockTwo).toBeCalledTimes(1);
     expect(mockThree).toBeCalledTimes(1);
 
-    // Perform state change in act to suppress console error
+    /* Action */
     act(() => {
       updateState(d => {
         d.name.first = 'changed';
       });
     });
 
+    /* Test */
     expect(mockOne).toBeCalledTimes(1);
     expect(mockTwo).toBeCalledTimes(2);
     expect(mockThree).toBeCalledTimes(2);
