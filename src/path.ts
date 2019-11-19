@@ -1,4 +1,4 @@
-interface PathArray<T, L> extends Array<string | number> {
+interface IPathArray<T, L> extends Array<string | number> {
   ['0']?: keyof T;
   ['1']?: L extends {
     ['0']: infer K0;
@@ -93,7 +93,7 @@ type ArrayHasIndex<MinLenght extends number> = { [K in MinLenght]: any };
 
 export type PathArrayValue<
   T,
-  L extends PathArray<T, L>
+  L extends IPathArray<T, L>
 > = L extends ArrayHasIndex<0 | 1 | 2 | 3 | 4 | 5 | 6 | 7>
   ? any
   : L extends ArrayHasIndex<0 | 1 | 2 | 3 | 4 | 5 | 6>
@@ -112,9 +112,9 @@ export type PathArrayValue<
   ? T[L[0]]
   : never;
 
-export type Path<T, L> = PathArray<T, L> | keyof T;
+export type Path<T, L> = IPathArray<T, L> | keyof T;
 
-export type PathValue<T, L extends Path<T, L>> = L extends PathArray<T, L>
+export type PathValue<T, L extends Path<T, L>> = L extends IPathArray<T, L>
   ? PathArrayValue<T, L>
   : L extends keyof T
   ? T[L]
@@ -131,8 +131,8 @@ export const getFromPath = <T extends any, P extends Path<T, P>, D>(
   }
 
   return Array.isArray(path)
-    // Find value if exist return otherwise return undefined value;
-    ? (path.reduce(
+    ? // Find value if exist return otherwise return undefined value;
+      (path.reduce(
         (prevObj, key) => prevObj && prevObj[key],
         object,
       ) as PathValue<T, P>) || value
