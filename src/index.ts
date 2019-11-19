@@ -27,9 +27,26 @@ export const createStore = <State>(initialState: State) => {
     let changes: Patch[] = [];
     // Update state from draft and record the changes made
     [state, changes] = produceWithPatches(state, draftFn);
-    // Emit callback for every change
+
+    const changedKeys: string[] = [];
     changes.forEach(c => {
-      emitDeep(subscriptions, c.path);
+      const fullPath = c.path.join('.');
+      const keys = Object.keys(subscriptions).filter(
+        k => k.includes(fullPath) || fullPath.includes(k),
+      );
+
+      // Push unique keys to the array
+      keys.forEach(k => {
+        if (!changedKeys.includes(k)) {
+          changedKeys.push(k);
+        }
+      });
+    });
+
+    // Run every callback for each changed key
+    changedKeys.forEach(key => {
+      const subKeys = Object.keys(subscriptions[key]);
+      subKeys.forEach(subKey => subscriptions[key][subKey]?.());
     });
 
     // Return updated state
@@ -89,21 +106,4 @@ export const createStore = <State>(initialState: State) => {
     updateState,
     useStateValue,
   };
-};
-
-// Emits to event bus for each path parent and child
-const emitDeep = (
-  subscriptions: Subscriptions,
-  paths: Array<string | number>,
-  parent: string = '',
-) => {
-  const path = parent + paths[0];
-  const keys = Object.keys(subscriptions).filter(k => k.includes(path));
-  keys.forEach(key => {
-    const subKeys = Object.keys(subscriptions[key]);
-    subKeys.forEach(subKey => subscriptions[key][subKey]?.());
-  });
-  if (paths.length > 1) {
-    emitDeep(subscriptions, paths.slice(1, paths.length), path + '.');
-  }
 };
