@@ -24,7 +24,7 @@ describe('subscribe', () => {
     expect(mockSub).toBeCalledTimes(1);
   });
 
-  it('calls subscribed deep property event when relevant state is changed', () => {
+  it('calls deep property event when relevant state is changed', () => {
     /* Setup */
     const { updateState, subscribe } = createStore(initialState);
     const mockSub = jest.fn();
