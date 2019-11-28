@@ -6,6 +6,22 @@ const initialState = {
     first: 'john',
     last: 'doe',
   },
+  obj: {
+    thing: {
+      a: 1,
+      b: [
+        {
+          hello: 0,
+        },
+        {
+          hello: 1,
+        },
+        {
+          hello: 2,
+        },
+      ],
+    },
+  },
 };
 
 describe('subscribe', () => {
@@ -39,7 +55,22 @@ describe('subscribe', () => {
     expect(mockSub).toBeCalledTimes(1);
   });
 
-  it('calls subscribed event when relevant state is changed with different param versions', () => {
+  it('calls even deeper property event when relevant state is changed', () => {
+    /* Setup */
+    const { updateState, subscribe } = createStore(initialState);
+    const mockSub = jest.fn();
+    subscribe(['obj', 'thing', 'b', 0, 'hello'], mockSub);
+
+    /* Action */
+    updateState(d => {
+      d.obj.thing.b[0].hello = 10;
+    });
+
+    /* Test */
+    expect(mockSub).toBeCalledTimes(1);
+  });
+
+  it('calls event when relevant state is changed with different param versions', () => {
     /* Setup */
     const { updateState, subscribe } = createStore(initialState);
     const mockSub = jest.fn();
@@ -134,6 +165,26 @@ describe('subscribe', () => {
     /* Action */
     updateState(d => {
       d.name.first = 'changed';
+    });
+
+    /* Test */
+    expect(mockSub).toBeCalledTimes(1);
+  });
+
+  it('calls event once when parent & child changes at same time', () => {
+    /* Setup */
+    const { updateState, subscribe } = createStore(initialState);
+    const mockSub = jest.fn();
+    subscribe(['name', 'first'], mockSub);
+
+    /* Action */
+    updateState(d => {
+      d.name = {
+        first: 'new',
+        last: 'changed',
+      };
+
+      d.name.first = 'newer';
     });
 
     /* Test */

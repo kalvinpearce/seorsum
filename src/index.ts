@@ -61,11 +61,11 @@ export const createStore = <State>(initialState: State) => {
    * @param callback function to run when state piece changes
    * @returns function to unsubscribe the callback
    */
-  const subscribe = <PPath extends Path<State, PPath>>(
+  const subscribe = <PPath extends Path<S, PPath>, S extends State = State>(
     statePath: PPath,
-    callback: (state: PathValue<State, PPath> | State[keyof State]) => void,
+    callback: (state: PathValue<S, PPath> | S[keyof S]) => void,
   ) => {
-    const fn = () => callback(getFromPath(state, statePath));
+    const fn = () => callback(getFromPath(state as S, statePath));
 
     const key = Array.isArray(statePath)
       ? statePath.join('.')
