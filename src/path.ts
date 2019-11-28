@@ -87,6 +87,90 @@ interface IPathArray<T, L> extends Array<string | number> {
         : never
       : never
     : never;
+  ['7']?: L extends {
+    ['0']: infer K0;
+    ['1']: infer K1;
+    ['2']: infer K2;
+    ['3']: infer K3;
+    ['4']: infer K4;
+    ['5']: infer K5;
+    ['6']: infer K6;
+  }
+    ? K0 extends keyof T
+      ? K1 extends keyof T[K0]
+        ? K2 extends keyof T[K0][K1]
+          ? K3 extends keyof T[K0][K1][K2]
+            ? K4 extends keyof T[K0][K1][K2][K3]
+              ? K5 extends keyof T[K0][K1][K2][K3][K4]
+                ? K6 extends keyof T[K0][K1][K2][K3][K4][K5]
+                  ? keyof T[K0][K1][K2][K3][K4][K5][K6]
+                  : never
+                : never
+              : never
+            : never
+          : never
+        : never
+      : never
+    : never;
+  ['8']?: L extends {
+    ['0']: infer K0;
+    ['1']: infer K1;
+    ['2']: infer K2;
+    ['3']: infer K3;
+    ['4']: infer K4;
+    ['5']: infer K5;
+    ['6']: infer K6;
+    ['7']: infer K7;
+  }
+    ? K0 extends keyof T
+      ? K1 extends keyof T[K0]
+        ? K2 extends keyof T[K0][K1]
+          ? K3 extends keyof T[K0][K1][K2]
+            ? K4 extends keyof T[K0][K1][K2][K3]
+              ? K5 extends keyof T[K0][K1][K2][K3][K4]
+                ? K6 extends keyof T[K0][K1][K2][K3][K4][K5]
+                  ? K7 extends keyof T[K0][K1][K2][K3][K4][K5][K6]
+                    ? keyof T[K0][K1][K2][K3][K4][K5][K6][K7]
+                    : never
+                  : never
+                : never
+              : never
+            : never
+          : never
+        : never
+      : never
+    : never;
+  ['9']?: L extends {
+    ['0']: infer K0;
+    ['1']: infer K1;
+    ['2']: infer K2;
+    ['3']: infer K3;
+    ['4']: infer K4;
+    ['5']: infer K5;
+    ['6']: infer K6;
+    ['7']: infer K7;
+    ['8']: infer K8;
+  }
+    ? K0 extends keyof T
+      ? K1 extends keyof T[K0]
+        ? K2 extends keyof T[K0][K1]
+          ? K3 extends keyof T[K0][K1][K2]
+            ? K4 extends keyof T[K0][K1][K2][K3]
+              ? K5 extends keyof T[K0][K1][K2][K3][K4]
+                ? K6 extends keyof T[K0][K1][K2][K3][K4][K5]
+                  ? K7 extends keyof T[K0][K1][K2][K3][K4][K5][K6]
+                    ? K8 extends keyof T[K0][K1][K2][K3][K4][K5][K6][K7]
+                      ? keyof T[K0][K1][K2][K3][K4][K5][K6][K7][K8]
+                      : never
+                    : never
+                  : never
+                : never
+              : never
+            : never
+          : never
+        : never
+      : never
+    : never;
 }
 
 type ArrayHasIndex<MinLenght extends number> = { [K in MinLenght]: any };
@@ -94,8 +178,14 @@ type ArrayHasIndex<MinLenght extends number> = { [K in MinLenght]: any };
 export type PathArrayValue<
   T,
   L extends IPathArray<T, L>
-> = L extends ArrayHasIndex<0 | 1 | 2 | 3 | 4 | 5 | 6 | 7>
+> = L extends ArrayHasIndex<0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10>
   ? any
+  : L extends ArrayHasIndex<0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9>
+  ? T[L[0]][L[1]][L[2]][L[3]][L[4]][L[5]][L[6]][L[7]][L[8]][L[9]]
+  : L extends ArrayHasIndex<0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8>
+  ? T[L[0]][L[1]][L[2]][L[3]][L[4]][L[5]][L[6]][L[7]][L[8]]
+  : L extends ArrayHasIndex<0 | 1 | 2 | 3 | 4 | 5 | 6 | 7>
+  ? T[L[0]][L[1]][L[2]][L[3]][L[4]][L[5]][L[6]][L[7]]
   : L extends ArrayHasIndex<0 | 1 | 2 | 3 | 4 | 5 | 6>
   ? T[L[0]][L[1]][L[2]][L[3]][L[4]][L[5]][L[6]]
   : L extends ArrayHasIndex<0 | 1 | 2 | 3 | 4 | 5>
@@ -120,21 +210,15 @@ export type PathValue<T, L extends Path<T, L>> = L extends IPathArray<T, L>
   ? T[L]
   : never;
 
-export const getFromPath = <T extends any, P extends Path<T, P>, D>(
+export const getFromPath = <T extends any, P extends Path<T, P>>(
   object: T,
   path: P,
-  value?: D,
 ) => {
-  // return undefined if path is falsy
-  if (!path) {
-    return undefined;
-  }
-
   return Array.isArray(path)
     ? // Find value if exist return otherwise return undefined value;
       (path.reduce(
         (prevObj, key) => prevObj && prevObj[key],
         object,
-      ) as PathValue<T, P>) || value
+      ) as PathValue<T, P>) || undefined
     : object[path as keyof T];
 };
