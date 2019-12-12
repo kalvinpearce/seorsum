@@ -25,8 +25,9 @@ export const createStore = <State>(initialState: State) => {
    */
   const updateState = (draftFn: (draft: State) => void) => {
     let changes: Patch[] = [];
+    const someFunc = (draft: State) => void draftFn(draft);
     // Update state from draft and record the changes made
-    [state, changes] = produceWithPatches(state, draftFn);
+    [state, changes] = produceWithPatches(state, someFunc);
 
     const changedKeys: string[] = [];
     changes.forEach(c => {
