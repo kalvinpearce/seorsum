@@ -25,6 +25,17 @@ describe('updateState', () => {
     expect(newState.a).toBe(newA);
   });
 
+  it("ignores draft func's return value", () => {
+    /* Setup */
+    const { updateState } = createStore(initialState);
+
+    /* Action */
+    const newState = updateState(d => (d.a = newA));
+
+    /* Test */
+    expect(newState.a).toBe(newA);
+  });
+
   it('updates deep state', () => {
     /* Setup */
     const { updateState } = createStore(initialState);
