@@ -63,13 +63,11 @@ export const createStore = <State>(initialState: State) => {
    */
   const subscribe = <PPath extends Path<S, PPath>, S extends State = State>(
     statePath: PPath,
-    callback: (state: PathValue<S, PPath> | S[keyof S]) => void,
+    callback: (state: PathValue<S, PPath>) => void,
   ) => {
     const fn = () => callback(getFromPath(state as S, statePath));
 
-    const key = Array.isArray(statePath)
-      ? statePath.join('.')
-      : (statePath as string);
+    const key = statePath.join('.');
 
     // Add to event bus
     if (subscriptions[key] === undefined) {
@@ -91,10 +89,12 @@ export const createStore = <State>(initialState: State) => {
    * @param statePath piece of state to subscribe to
    * @returns state piece current value
    */
-  const useStateValue = <PPath extends Path<State, PPath>>(
+  const useStateValue = <PPath extends Path<S, PPath>, S extends State = State>(
     statePath: PPath,
   ) => {
-    const [value, setValue] = React.useState(getFromPath(state, statePath));
+    const [value, setValue] = React.useState(
+      getFromPath<S, PPath>(state as S, statePath),
+    );
     React.useEffect(() => {
       return subscribe(statePath, setValue);
     }, []);

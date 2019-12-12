@@ -27,7 +27,7 @@ describe('useStateValue', () => {
   it('renderes the initial state', () => {
     /* Setup */
     const { useStateValue } = createStore(initialState);
-    const wrapper = mount(<Comp useState={() => useStateValue('a')} />);
+    const wrapper = mount(<Comp useState={() => useStateValue(['a'])} />);
 
     /* Test */
     expect(wrapper.find('span').text()).toBe(initialState.a);
@@ -37,7 +37,7 @@ describe('useStateValue', () => {
     /* Setup */
     const spy = jest.spyOn(global.console, 'error');
     const { updateState, useStateValue } = createStore(initialState);
-    const wrapper = mount(<Comp useState={() => useStateValue('a')} />);
+    const wrapper = mount(<Comp useState={() => useStateValue(['a'])} />);
 
     /* Test */
     expect(wrapper.find('span').text()).toBe(initialState.a);
@@ -58,7 +58,7 @@ describe('useStateValue', () => {
     /* Setup */
     const newA = 'world';
     const { updateState, useStateValue } = createStore(initialState);
-    const wrapper = mount(<Comp useState={() => useStateValue('a')} />);
+    const wrapper = mount(<Comp useState={() => useStateValue(['a'])} />);
 
     /* Test */
     expect(wrapper.find('span').text()).toBe(initialState.a);
@@ -79,7 +79,7 @@ describe('useStateValue', () => {
     const { updateState, useStateValue } = createStore(initialState);
     const mockfn = jest.fn();
     const CompMulti = () => {
-      const val1 = useStateValue('a');
+      const val1 = useStateValue(['a']);
       const val2 = useStateValue(['name', 'first']);
       React.useEffect(() => {
         mockfn();
@@ -124,7 +124,7 @@ describe('useStateValue', () => {
     const mockThree = jest.fn();
     const CompOne = () => (
       <Comp
-        useState={() => useStateValue('a')}
+        useState={() => useStateValue(['a'])}
         useEffect={val =>
           React.useEffect(() => {
             mockOne();
@@ -186,7 +186,7 @@ describe('useStateValue', () => {
     const mockThree = jest.fn();
     const CompOne = () => (
       <Comp
-        useState={() => useStateValue('a')}
+        useState={() => useStateValue(['a'])}
         useEffect={val =>
           React.useEffect(() => {
             mockOne();
@@ -196,7 +196,7 @@ describe('useStateValue', () => {
     );
     const CompTwo = () => (
       <Comp
-        useState={() => useStateValue('name')}
+        useState={() => useStateValue(['name'])}
         useEffect={val =>
           React.useEffect(() => {
             mockTwo();

@@ -29,7 +29,7 @@ describe('subscribe', () => {
     /* Setup */
     const { updateState, subscribe } = createStore(initialState);
     const mockSub = jest.fn();
-    subscribe('a', mockSub);
+    subscribe(['a'], mockSub);
 
     /* Action */
     updateState(d => {
@@ -70,22 +70,6 @@ describe('subscribe', () => {
     expect(mockSub).toBeCalledTimes(1);
   });
 
-  it('calls event when relevant state is changed with different param versions', () => {
-    /* Setup */
-    const { updateState, subscribe } = createStore(initialState);
-    const mockSub = jest.fn();
-    subscribe('a', mockSub);
-    subscribe(['a'], mockSub);
-
-    /* Action */
-    updateState(d => {
-      d.a = 'changed';
-    });
-
-    /* Test */
-    expect(mockSub).toBeCalledTimes(2);
-  });
-
   it("doesn't call event when irrelevant state is changed", () => {
     /* Setup */
     const { updateState, subscribe } = createStore(initialState);
@@ -109,7 +93,7 @@ describe('subscribe', () => {
     const { updateState, subscribe } = createStore(initialState);
     const mockSub = jest.fn();
     const newA = 'changed';
-    subscribe('a', mockSub);
+    subscribe(['a'], mockSub);
 
     /* Action */
     updateState(d => {
@@ -125,8 +109,8 @@ describe('subscribe', () => {
     const { updateState, subscribe } = createStore(initialState);
     const mockSub1 = jest.fn();
     const mockSub2 = jest.fn();
-    subscribe('a', mockSub1);
-    subscribe('a', mockSub2);
+    subscribe(['a'], mockSub1);
+    subscribe(['a'], mockSub2);
 
     /* Action */
     updateState(d => {
@@ -160,7 +144,7 @@ describe('subscribe', () => {
     /* Setup */
     const { updateState, subscribe } = createStore(initialState);
     const mockSub = jest.fn();
-    subscribe('name', mockSub);
+    subscribe(['name'], mockSub);
 
     /* Action */
     updateState(d => {
@@ -195,7 +179,7 @@ describe('subscribe', () => {
     /* Setup */
     const { updateState, subscribe } = createStore(initialState);
     const mockSub = jest.fn();
-    const unsub = subscribe('a', mockSub);
+    const unsub = subscribe(['a'], mockSub);
 
     /* Action */
     updateState(d => {
@@ -221,36 +205,7 @@ describe('subscribe', () => {
     const { updateState, subscribe } = createStore(initialState);
     const mockSub1 = jest.fn();
     const mockSub2 = jest.fn();
-    const unsub1 = subscribe('a', mockSub1);
-    const unsub2 = subscribe('a', mockSub2);
-
-    /* Action */
-    updateState(d => {
-      d.a = 'changed';
-    });
-
-    /* Test */
-    expect(mockSub1).toBeCalledTimes(1);
-    expect(mockSub2).toBeCalledTimes(1);
-
-    /* Action */
-    unsub1();
-
-    updateState(d => {
-      d.a = 'changed again';
-    });
-
-    /* Test */
-    expect(mockSub1).toBeCalledTimes(1);
-    expect(mockSub2).toBeCalledTimes(2);
-  });
-
-  it("it doesn't unsubscribe the wrong event with different param types 1", () => {
-    /* Setup */
-    const { updateState, subscribe } = createStore(initialState);
-    const mockSub1 = jest.fn();
-    const mockSub2 = jest.fn();
-    const unsub1 = subscribe('a', mockSub1);
+    const unsub1 = subscribe(['a'], mockSub1);
     const unsub2 = subscribe(['a'], mockSub2);
 
     /* Action */
@@ -272,34 +227,5 @@ describe('subscribe', () => {
     /* Test */
     expect(mockSub1).toBeCalledTimes(1);
     expect(mockSub2).toBeCalledTimes(2);
-  });
-
-  it("it doesn't unsubscribe the wrong event with different param types 2", () => {
-    /* Setup */
-    const { updateState, subscribe } = createStore(initialState);
-    const mockSub1 = jest.fn();
-    const mockSub2 = jest.fn();
-    const unsub1 = subscribe('a', mockSub1);
-    const unsub2 = subscribe(['a'], mockSub2);
-
-    /* Action */
-    updateState(d => {
-      d.a = 'changed';
-    });
-
-    /* Test */
-    expect(mockSub1).toBeCalledTimes(1);
-    expect(mockSub2).toBeCalledTimes(1);
-
-    /* Action */
-    unsub2();
-
-    updateState(d => {
-      d.a = 'changed again';
-    });
-
-    /* Test */
-    expect(mockSub1).toBeCalledTimes(2);
-    expect(mockSub2).toBeCalledTimes(1);
   });
 });
